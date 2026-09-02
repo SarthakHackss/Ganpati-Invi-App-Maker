@@ -191,7 +191,7 @@ export default function BuilderStudio() {
               e.preventDefault();
               const ok = authenticateAdmin(pinInput);
               if (!ok) {
-                setPinError('चुकीचा पिन! (डिफॉल्ट पिन: 1963)');
+                setPinError('चुकीचा पिन!');
               } else {
                 setPinInput('');
                 setPinError('');
@@ -201,7 +201,7 @@ export default function BuilderStudio() {
               <input
                 type="password"
                 className="builder-input"
-                placeholder="पिन टाका (उदा. 1963)"
+                placeholder="पिन टाका"
                 value={pinInput}
                 onChange={(e) => { setPinInput(e.target.value); setPinError(''); }}
                 autoFocus
