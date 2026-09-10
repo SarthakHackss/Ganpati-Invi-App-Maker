@@ -99,7 +99,7 @@ export function getSavedClients() {
     const parsed = data ? JSON.parse(data) : [];
     const clientList = Array.isArray(parsed) ? parsed : [];
 
-    // Ensure all built-in templates (like ajit, deshmukh, patil) are always present
+    // Ensure all built-in templates (like ajitpatil, deshmukh, patil) are always present
     const combined = [...clientList];
     for (const t of demoTemplates) {
       const idx = combined.findIndex(c => 
@@ -164,12 +164,14 @@ export function deleteClientFromStorage(clientId) {
 
 export function findClientBySlug(slug) {
   if (!slug) return null;
-  const clean = slug.trim().toLowerCase();
+  const clean = slug.trim().toLowerCase().replace(/[^a-z0-9]/g, '');
   const clients = getSavedClients();
-  return clients.find(c => 
-    c.clientSlug?.toLowerCase() === clean || 
-    c.id?.toLowerCase() === clean
-  ) || null;
+  return clients.find(c => {
+    const cSlug = (c.clientSlug || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+    const cId = (c.id || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+    const aliases = (c.aliases || []).map(a => String(a).toLowerCase().replace(/[^a-z0-9]/g, ''));
+    return cSlug === clean || cId === clean || aliases.includes(clean);
+  }) || null;
 }
 
 /**

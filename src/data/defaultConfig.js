@@ -115,17 +115,18 @@ export const demoTemplates = [
   },
   {
     ...defaultConfig,
-    id: 'ajit',
-    clientSlug: 'ajit',
+    id: 'ajitpatil',
+    clientSlug: 'ajitpatil',
+    aliases: ['ajit', 'ajitpatil', 'ajit-patil'],
     theme: 'royalGold',
     meta: {
-      title: 'अजित गणेश उत्सव',
+      title: 'अजित पाटील गणेश उत्सव',
       description: 'गणरायाच्या आगमनाचे सस्नेह आमंत्रण'
     },
-    familyName: 'अजित',
+    familyName: 'अजित पाटील',
     heroTitle: 'बाप्पाचे आगमन',
     heroIntroLine: 'आमच्या निवासस्थानी यावर्षी',
-    familyNameInvite: 'अजित परिवाराकडून',
+    familyNameInvite: 'अजित पाटील परिवाराकडून',
     utsavSection: {
       tabs: [
         { label: 'स्थापना', value: '१४ सप्टेंबर २०२६' },
@@ -138,7 +139,7 @@ export const demoTemplates = [
     },
     finalSection: {
       message: ['आपली उपस्थिती हेच आमच्यासाठी', 'बाप्पाचे मंगल आशीर्वाद आहेत.'],
-      familySignature: '— अजित परिवार'
+      familySignature: '— अजित पाटील परिवार'
     }
   },
   {
