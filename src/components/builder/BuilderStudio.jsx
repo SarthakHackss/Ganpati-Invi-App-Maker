@@ -3,6 +3,9 @@ import { useInvitation } from '../../context/InvitationContext';
 import { themePalettes } from '../../data/themes';
 import { 
   generateShareUrl, 
+  generateSlugUrl,
+  generateSubdomainUrl,
+  encodeConfigToUrl,
   generateWhatsAppMessage, 
   getSavedClients, 
   saveClientToStorage, 
@@ -33,6 +36,7 @@ export default function BuilderStudio() {
   const [savedClients, setSavedClients] = useState([]);
   const [pinInput, setPinInput] = useState('');
   const [pinError, setPinError] = useState('');
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const fileInputRef = useRef(null);
 
   // Reload saved clients from localStorage
@@ -49,9 +53,14 @@ export default function BuilderStudio() {
     setTimeout(() => setToastMessage(''), 3000);
   };
 
-  // 1. Copy WhatsApp Link & Message
+  const clientSlug = config.clientSlug || (config.familyName ? config.familyName.trim().toLowerCase().replace(/\s+/g, '-') : 'client');
+  const shortSlugUrl = generateSlugUrl(clientSlug);
+  const subdomainUrl = generateSubdomainUrl(clientSlug);
+  const compactDataUrl = `${typeof window !== 'undefined' ? window.location.origin : 'https://ganpatiinvi.sarthakpatil.social'}/?d=${encodeConfigToUrl(config)}`;
+
+  // 1. Copy WhatsApp Link & Message (uses clean short URL)
   const handleCopyWhatsApp = async () => {
-    const shareUrl = generateShareUrl(config);
+    const shareUrl = shortSlugUrl;
     const message = generateWhatsAppMessage(config, shareUrl);
 
     try {
@@ -67,16 +76,17 @@ export default function BuilderStudio() {
     }
   };
 
-  // 2. Copy Direct URL Only
+  // 2. Copy Direct Short URL Only
   const handleCopyDirectUrl = async () => {
-    const shareUrl = generateShareUrl(config);
     try {
       if (navigator.clipboard) {
-        await navigator.clipboard.writeText(shareUrl);
-        showToast('🔗 शेअर करण्यायोग्य डिजिटल लिंक कॉपी झाली!');
+        await navigator.clipboard.writeText(shortSlugUrl);
+        showToast('🔗 शॉर्ट लिंक कॉपी झाली!');
+      } else {
+        showToast(shortSlugUrl);
       }
     } catch (err) {
-      showToast(shareUrl);
+      showToast(shortSlugUrl);
     }
   };
 
@@ -226,6 +236,138 @@ export default function BuilderStudio() {
         </div>
       )}
 
+      {/* Share Link Hub Modal */}
+      {isShareModalOpen && (
+        <div className="builder-overlay" onClick={() => setIsShareModalOpen(false)}>
+          <div className="builder-share-modal" onClick={e => e.stopPropagation()}>
+            <div className="builder-share-header">
+              <h3><span>🔗</span> शेअर लिंक्स हब ({config.familyName || 'क्लायंट'})</h3>
+              <button 
+                className="builder-btn-close" 
+                onClick={() => setIsShareModalOpen(false)}
+                title="Close"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Option 1: Clean Short Slug Link */}
+            <div className="share-card-item">
+              <div className="share-card-title">
+                <span>🌟 १. शॉर्ट लिंक (Short URL - सर्व डिव्हाईसवर चालते)</span>
+              </div>
+              <p className="share-card-desc">
+                क्लायंट व पाहुण्यांसाठी सर्वात सोपी आणि लहान लिंक.
+              </p>
+              <div className="share-input-box">
+                <input type="text" readOnly value={shortSlugUrl} />
+                <button 
+                  type="button" 
+                  className="builder-btn builder-btn-primary"
+                  onClick={() => {
+                    navigator.clipboard?.writeText(shortSlugUrl);
+                    showToast('✅ शॉर्ट लिंक कॉपी झाली!');
+                  }}
+                >
+                  कॉपी
+                </button>
+                <a 
+                  href={shortSlugUrl} 
+                  target="_blank" 
+                  rel="noreferrer" 
+                  className="builder-btn builder-btn-secondary"
+                >
+                  ओपन
+                </a>
+              </div>
+            </div>
+
+            {/* Option 2: Subdomain Link */}
+            <div className="share-card-item">
+              <div className="share-card-title">
+                <span>🌐 २. सबडोमेन लिंक (Subdomain URL)</span>
+              </div>
+              <p className="share-card-desc">
+                उदा. {subdomainUrl} (Cloudflare वरून कॉन्फिगर केलेली असल्यास).
+              </p>
+              <div className="share-input-box">
+                <input type="text" readOnly value={subdomainUrl} />
+                <button 
+                  type="button" 
+                  className="builder-btn builder-btn-primary"
+                  onClick={() => {
+                    navigator.clipboard?.writeText(subdomainUrl);
+                    showToast('✅ सबडोमेन लिंक कॉपी झाली!');
+                  }}
+                >
+                  कॉपी
+                </button>
+                <a 
+                  href={subdomainUrl} 
+                  target="_blank" 
+                  rel="noreferrer" 
+                  className="builder-btn builder-btn-secondary"
+                >
+                  ओपन
+                </a>
+              </div>
+            </div>
+
+            {/* Option 3: WhatsApp Share Button */}
+            <div className="share-card-item">
+              <div className="share-card-title">
+                <span>📱 ३. WhatsApp आमंत्रण (मराठी मेसेज + लिंक)</span>
+              </div>
+              <p className="share-card-desc">
+                बाप्पाच्या स्थापनेच्या वेळेसह तयार केलेला सुंदर आमंत्रण संदेश.
+              </p>
+              <div style={{ display: 'flex', gap: '8px', marginTop: '4px' }}>
+                <button 
+                  type="button" 
+                  className="builder-btn builder-btn-primary"
+                  style={{ flex: 1, justifyContent: 'center' }}
+                  onClick={handleCopyWhatsApp}
+                >
+                  📋 मेसेज व लिंक कॉपी करा
+                </button>
+                <a 
+                  href={`https://api.whatsapp.com/send?text=${encodeURIComponent(generateWhatsAppMessage(config, shortSlugUrl))}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="builder-btn builder-btn-secondary"
+                  style={{ background: '#25D366', color: '#000', borderColor: '#25D366', fontWeight: 'bold' }}
+                >
+                  WhatsApp वर पाठवा
+                </a>
+              </div>
+            </div>
+
+            {/* Option 4: Self-Contained Encrypted URL */}
+            <div className="share-card-item">
+              <div className="share-card-title">
+                <span>🔒 ४. कॉम्पॅक्ट डेटा लिंक (Portable URL)</span>
+              </div>
+              <p className="share-card-desc">
+                कोणत्याही सर्व्हर किंवा डेटाबेसशिवाय थेट चालणारी कम्प्रेस्ड लिंक.
+              </p>
+              <div className="share-input-box">
+                <input type="text" readOnly value={compactDataUrl} />
+                <button 
+                  type="button" 
+                  className="builder-btn builder-btn-secondary"
+                  onClick={() => {
+                    navigator.clipboard?.writeText(compactDataUrl);
+                    showToast('✅ कॉम्पॅक्ट लिंक कॉपी झाली!');
+                  }}
+                >
+                  कॉपी
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* 2. Floating Trigger Button: ONLY VISIBLE TO THE OWNER (isAdmin) */}
       {isAdmin && !isBuilderOpen && (
         <button
@@ -257,18 +399,18 @@ export default function BuilderStudio() {
               <div className="builder-header-actions">
                 <button 
                   className="builder-btn builder-btn-primary" 
-                  onClick={handleCopyWhatsApp}
-                  title="Copy ready-to-send WhatsApp invitation message with link"
+                  onClick={() => setIsShareModalOpen(true)}
+                  title="Open Share Links Hub"
                 >
-                  <span>📱</span> WhatsApp लिंक कॉपी
+                  <span>🔗</span> शेअर लिंक्स
                 </button>
 
                 <button 
                   className="builder-btn builder-btn-secondary" 
-                  onClick={handleCopyDirectUrl}
-                  title="Copy direct shareable web URL"
+                  onClick={handleCopyWhatsApp}
+                  title="Copy ready-to-send WhatsApp invitation message with link"
                 >
-                  <span>🔗</span> लिंक
+                  <span>📱</span> WhatsApp कॉपी
                 </button>
 
                 <button 

@@ -527,3 +527,82 @@
   margin-bottom: 0 !important;
   font-weight: 600;
 }
+
+/* Share Link Hub Modal */
+.builder-share-modal {
+  width: min(94vw, 560px);
+  margin: auto;
+  max-height: 90vh;
+  overflow-y: auto;
+  background: #091433;
+  background-image: radial-gradient(circle at top, rgba(212, 166, 74, 0.18), transparent 70%);
+  border: 1px solid rgba(212, 166, 74, 0.35);
+  border-radius: 24px;
+  padding: 28px 24px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.85), 0 0 40px rgba(212, 166, 74, 0.2);
+  color: #f5e9d0;
+  font-family: 'Noto Serif Devanagari', Sura, sans-serif;
+  animation: builderToastIn 0.25s ease;
+}
+
+.builder-share-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid rgba(212, 166, 74, 0.2);
+  padding-bottom: 12px;
+  margin-bottom: 18px;
+}
+
+.builder-share-header h3 {
+  margin: 0;
+  color: #ffd875;
+  font-size: 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.share-card-item {
+  background: rgba(14, 28, 64, 0.7);
+  border: 1px solid rgba(212, 166, 74, 0.25);
+  border-radius: 14px;
+  padding: 14px 16px;
+  margin-bottom: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.share-card-title {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #ffd875;
+}
+
+.share-card-desc {
+  font-size: 0.78rem;
+  color: #c9baa1;
+  margin: 0;
+}
+
+.share-input-box {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.share-input-box input {
+  flex: 1;
+  background: rgba(4, 9, 23, 0.9);
+  border: 1px solid rgba(212, 166, 74, 0.3);
+  border-radius: 8px;
+  color: #ffd875;
+  font-size: 0.85rem;
+  padding: 8px 12px;
+  outline: none;
+  font-family: monospace;
+}

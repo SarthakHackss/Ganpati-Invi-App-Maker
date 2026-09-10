@@ -4,11 +4,28 @@ import { defaultConfig, demoTemplates, mergeWithDefault } from '../data/defaultC
 const LOCAL_STORAGE_KEY = 'ganpati_invi_saved_clients';
 
 /**
- * Compresses a configuration object into a URL-safe string
+ * Extracts only fields that differ from default configuration to keep URLs tiny
+ */
+export function getDeltaConfig(customConfig) {
+  if (!customConfig || typeof customConfig !== 'object') return {};
+  const delta = {};
+
+  for (const [key, value] of Object.entries(customConfig)) {
+    if (value === undefined || value === null) continue;
+    // Skip if identical to default
+    if (JSON.stringify(value) === JSON.stringify(defaultConfig[key])) continue;
+    delta[key] = value;
+  }
+  return delta;
+}
+
+/**
+ * Compresses only delta configuration into a compact URL-safe string
  */
 export function encodeConfigToUrl(config) {
   try {
-    const jsonStr = JSON.stringify(config);
+    const delta = getDeltaConfig(config);
+    const jsonStr = JSON.stringify(delta);
     return LZString.compressToEncodedURIComponent(jsonStr);
   } catch (err) {
     console.error('Failed to encode config to URL:', err);
@@ -33,18 +50,33 @@ export function decodeConfigFromUrl(encodedStr) {
 }
 
 /**
- * Generates the full shareable URL for a config
+ * Generates a clean short slug URL: e.g. https://ganpatiinvi.sarthakpatil.social/?c=ajit
  */
-export function generateShareUrl(config, baseUrl = window.location.origin) {
-  const encoded = encodeConfigToUrl(config);
-  return `${baseUrl}/?d=${encoded}`;
+export function generateSlugUrl(slug, baseUrl) {
+  const cleanSlug = (slug || 'client').trim().toLowerCase();
+  const origin = baseUrl || (typeof window !== 'undefined' ? window.location.origin : 'https://ganpatiinvi.sarthakpatil.social');
+  return `${origin}/?c=${encodeURIComponent(cleanSlug)}`;
 }
 
 /**
- * Generates a clean slug URL
+ * Generates a custom subdomain URL: e.g. https://ajit.sarthakpatil.social
  */
-export function generateSlugUrl(slug, baseUrl = window.location.origin) {
-  return `${baseUrl}/?c=${encodeURIComponent(slug)}`;
+export function generateSubdomainUrl(slug) {
+  const cleanSlug = (slug || 'client').trim().toLowerCase().replace(/[^a-z0-9-]/g, '');
+  return `https://${cleanSlug}.sarthakpatil.social`;
+}
+
+/**
+ * Generates the best primary share URL for a client (preferring clean short URLs)
+ */
+export function generateShareUrl(config, baseUrl) {
+  const slug = (config.clientSlug || config.id || '').trim();
+  if (slug) {
+    return generateSlugUrl(slug, baseUrl);
+  }
+  const encoded = encodeConfigToUrl(config);
+  const origin = baseUrl || (typeof window !== 'undefined' ? window.location.origin : 'https://ganpatiinvi.sarthakpatil.social');
+  return `${origin}/?d=${encoded}`;
 }
 
 /**
@@ -53,8 +85,9 @@ export function generateSlugUrl(slug, baseUrl = window.location.origin) {
 export function generateWhatsAppMessage(config, shareUrl) {
   const familyName = config.familyNameInvite || `${config.familyName || ''} परिवाराकडून`;
   const sthapana = config.utsavSection?.tabs?.[0]?.value || '';
+  const url = shareUrl || generateShareUrl(config);
 
-  return `॥ श्री गणेशाय नमः ॥\n\n*गणेशोत्सवाचे सस्नेह आमंत्रण*\n\nआमच्या घरी यावर्षी बाप्पाचे आगमन होत असून, ${familyName} आपणास व आपल्या परिवारास आग्रहाचे निमंत्रण!\n\n📅 स्थापना: ${sthapana}\n📍 स्थळ: ${config.locationSection?.address || ''}\n\nखालील लिंकवर क्लिक करून डिजिटल पत्रिका पहा व बाप्पाचे आशीर्वाद घ्या:\n👉 ${shareUrl}\n\n— ${config.finalSection?.familySignature || familyName}`;
+  return `॥ श्री गणेशाय नमः ॥\n\n*गणेशोत्सवाचे सस्नेह आमंत्रण*\n\nआमच्या घरी यावर्षी बाप्पाचे आगमन होत असून, ${familyName} आपणास व आपल्या परिवारास आग्रहाचे निमंत्रण!\n\n📅 स्थापना: ${sthapana}\n📍 स्थळ: ${config.locationSection?.address || ''}\n\nखालील लिंकवर क्लिक करून डिजिटल पत्रिका पहा व बाप्पाचे आशीर्वाद घ्या:\n👉 ${url}\n\n— ${config.finalSection?.familySignature || familyName}`;
 }
 
 /**
@@ -63,13 +96,22 @@ export function generateWhatsAppMessage(config, shareUrl) {
 export function getSavedClients() {
   try {
     const data = localStorage.getItem(LOCAL_STORAGE_KEY);
-    if (!data) {
-      // Seed with initial demo templates if empty
-      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(demoTemplates));
-      return demoTemplates;
+    const parsed = data ? JSON.parse(data) : [];
+    const clientList = Array.isArray(parsed) ? parsed : [];
+
+    // Ensure all built-in templates (like ajit, deshmukh, patil) are always present
+    const combined = [...clientList];
+    for (const t of demoTemplates) {
+      const idx = combined.findIndex(c => 
+        (c.clientSlug && c.clientSlug.toLowerCase() === t.clientSlug.toLowerCase()) || 
+        (c.id && c.id.toLowerCase() === t.id.toLowerCase())
+      );
+      if (idx === -1) {
+        combined.push(t);
+      }
     }
-    const parsed = JSON.parse(data);
-    return Array.isArray(parsed) ? parsed : demoTemplates;
+
+    return combined;
   } catch (err) {
     console.error('Error reading saved clients from localStorage:', err);
     return demoTemplates;
@@ -87,7 +129,11 @@ export function saveClientToStorage(clientConfig) {
       updatedAt: new Date().toISOString()
     };
 
-    const existingIndex = clients.findIndex(c => c.clientSlug === slug || c.id === normalized.id);
+    const existingIndex = clients.findIndex(c => 
+      (c.clientSlug && c.clientSlug.toLowerCase() === slug.toLowerCase()) || 
+      (c.id && c.id.toLowerCase() === slug.toLowerCase())
+    );
+
     let updatedClients;
     if (existingIndex >= 0) {
       updatedClients = [...clients];
@@ -118,8 +164,12 @@ export function deleteClientFromStorage(clientId) {
 
 export function findClientBySlug(slug) {
   if (!slug) return null;
+  const clean = slug.trim().toLowerCase();
   const clients = getSavedClients();
-  return clients.find(c => c.clientSlug?.toLowerCase() === slug.toLowerCase() || c.id?.toLowerCase() === slug.toLowerCase()) || null;
+  return clients.find(c => 
+    c.clientSlug?.toLowerCase() === clean || 
+    c.id?.toLowerCase() === clean
+  ) || null;
 }
 
 /**
