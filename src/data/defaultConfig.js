@@ -115,6 +115,34 @@ export const demoTemplates = [
   },
   {
     ...defaultConfig,
+    id: 'ajit',
+    clientSlug: 'ajit',
+    theme: 'royalGold',
+    meta: {
+      title: 'अजित गणेश उत्सव',
+      description: 'गणरायाच्या आगमनाचे सस्नेह आमंत्रण'
+    },
+    familyName: 'अजित',
+    heroTitle: 'बाप्पाचे आगमन',
+    heroIntroLine: 'आमच्या निवासस्थानी यावर्षी',
+    familyNameInvite: 'अजित परिवाराकडून',
+    utsavSection: {
+      tabs: [
+        { label: 'स्थापना', value: '१४ सप्टेंबर २०२६' },
+        { label: 'आरती वेळ', values: ['सकाळी ८:३०', 'सायंकाळी ७:३०'] }
+      ],
+      note: [
+        'यावर्षी आमच्या घरी १४ सप्टेंबर २०२६ रोजी श्री गणरायाची स्थापना होणार आहे.',
+        'या मंगल प्रसंगी आपण सर्वांनी सहकुटुंब उपस्थित राहून बाप्पाचे आशीर्वाद घ्यावेत.'
+      ]
+    },
+    finalSection: {
+      message: ['आपली उपस्थिती हेच आमच्यासाठी', 'बाप्पाचे मंगल आशीर्वाद आहेत.'],
+      familySignature: '— अजित परिवार'
+    }
+  },
+  {
+    ...defaultConfig,
     id: 'sharma',
     clientSlug: 'sharma',
     theme: 'royalBlue',

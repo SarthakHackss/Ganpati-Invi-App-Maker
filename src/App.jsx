@@ -315,32 +315,6 @@ function LocationSection() {
   );
 }
 
-function GallerySection() {
-  const { config } = useInvitation();
-  const gallerySection = config.gallerySection || { images: [] };
-
-  return (
-    <section className="section gallery-section">
-      <img src="/assets/top-deco.webp" alt="" className="gallery-deco gallery-deco-top" />
-      <img src="/assets/top-deco.webp" alt="" className="gallery-deco gallery-deco-bottom" />
-
-      <FadeIn className="gallery-header">
-        <p className="gallery-tag">PREPARATIONS</p>
-        <h2 className="gallery-heading">आगमन की तयारी</h2>
-        <img src="/assets/divider.webp" alt="" className="gallery-divider" />
-      </FadeIn>
-
-      <div className="gallery-grid">
-        {(gallerySection.images || []).map((img, idx) => (
-          <FadeIn className="gallery-item" delay={0.1 * idx} key={idx}>
-            <img src={img.image} alt={img.label || `Gallery ${idx + 1}`} />
-            <div className="gallery-overlay" />
-          </FadeIn>
-        ))}
-      </div>
-    </section>
-  );
-}
 
 function FinalSection() {
   const { config, isAdmin, setIsBuilderOpen, setIsPinPromptOpen } = useInvitation();
@@ -645,7 +619,6 @@ function InvitationContent() {
         <FamilySection />
         <UtsavSection />
         <LocationSection />
-        <GallerySection />
         <FinalSection />
       </div>
       {introState !== 'complete' && (

@@ -350,7 +350,7 @@ export default function BuilderStudio() {
                 className={`builder-tab ${activeTab === 'gallery' ? 'active' : ''}`}
                 onClick={() => setActiveTab('gallery')}
               >
-                <span>🖼️</span> गॅलरी व संगीत (Media)
+                <span>🎵</span> संगीत व क्रेडिट (Audio)
               </button>
 
               <button 
@@ -726,7 +726,7 @@ export default function BuilderStudio() {
                 </div>
               )}
 
-              {/* TAB 6: GALLERY & MUSIC */}
+              {/* TAB 6: AUDIO & CREDITS */}
               {activeTab === 'gallery' && (
                 <div className="builder-form-grid">
                   <div className="builder-field-group builder-full-width">
@@ -761,45 +761,6 @@ export default function BuilderStudio() {
                       value={config.credit?.text || ''}
                       onChange={(e) => updateConfigField('credit.text', e.target.value)}
                     />
-                  </div>
-
-                  <div className="builder-field-group builder-full-width">
-                    <label className="builder-label">गॅलरी फोटो (Gallery Photos)</label>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(130px, 1fr))', gap: '14px', marginTop: '8px' }}>
-                      {(config.gallerySection?.images || []).map((img, idx) => (
-                        <div key={idx} style={{ position: 'relative', border: '1px solid rgba(212,166,74,0.3)', borderRadius: '12px', overflow: 'hidden' }}>
-                          <img 
-                            src={img.image} 
-                            alt={`Gallery ${idx + 1}`} 
-                            style={{ width: '100%', height: '110px', objectFit: 'cover', display: 'block' }} 
-                          />
-                          <label style={{ 
-                            position: 'absolute', 
-                            bottom: 0, 
-                            left: 0, 
-                            right: 0, 
-                            background: 'rgba(0,0,0,0.7)', 
-                            color: '#fff', 
-                            fontSize: '0.72rem', 
-                            textAlign: 'center', 
-                            padding: '4px',
-                            cursor: 'pointer' 
-                          }}>
-                            बदला
-                            <input 
-                              type="file" 
-                              accept="image/*" 
-                              style={{ display: 'none' }}
-                              onChange={(e) => handleImageUpload(e, (dataUrl) => {
-                                const updated = [...(config.gallerySection?.images || [])];
-                                updated[idx] = { ...updated[idx], image: dataUrl };
-                                updateConfigField('gallerySection.images', updated);
-                              })}
-                            />
-                          </label>
-                        </div>
-                      ))}
-                    </div>
                   </div>
                 </div>
               )}
